@@ -16,17 +16,14 @@ no-idl = []
 cpi = ["no-entrypoint"]
 default = []
 localnet = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 
 [dependencies]
-anchor-lang = "0.28.0"
-anchor-spl = "0.28.0"
-bytemuck = "1.14.0"
+anchor-lang = { workspace = true }
+anchor-spl = { workspace = true }
+bytemuck = { workspace = true }
 jito-merkle-verify = { path = "../../verify" }
-solana-program = "1.16.16"
-solana-security-txt = "1.1.1"
+solana-program = { workspace = true }
+solana-security-txt = { workspace = true }
 num_enum = "0.7.1"
-static_assertions = "1.1.0"
-locked-voter = { git = "https://github.com/TeamRaccoons/WAGMI", features = [
-    "cpi",
-    "no-entrypoint",
-], rev = "425ac5e3a51f15831c825874e531409d4dc12c71" }
+static_assertions = { workspace = true }

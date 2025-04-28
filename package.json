@@ -14,7 +14,7 @@
     "build-local": "anchor build -p merkle-distributor -- --features localnet",
     "run-tests": "RUST_LOG=error anchor run test",
     "test": "yarn build-local && yarn run-tests",
-    "idl": "anchor idl build -p merkle-distributor -o idl/merkle-distributor.json"
+    "idl": "anchor idl build -p merkle-distributor -o idl/merkle_distributor.json"
   },
   "lint-staged": {
     "*.{js,json,ts,yaml,yml}": [
@@ -23,8 +23,8 @@
     ]
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.28.0",
-    "@solana/spl-token": "^0.3.8",
+    "@coral-xyz/anchor": "^0.30.0",
+    "@solana/spl-token": "^0.4.6",
     "borsh": "^1.0.0",
     "decimal.js": "^10.4.3"
   },
@@ -41,13 +41,14 @@
     "eslint-plugin-mocha": "^10.1.0",
     "eslint-plugin-prettier": "^5.0.0",
     "husky": "^8.0.3",
-    "lint-staged": "^14.0.1",
     "js-sha3": "^0.8.0",
+    "js-sha256": "^0.11.0",
+    "lint-staged": "^14.0.1",
     "mocha": "^10.1.0",
     "prettier": "^3.0.3",
-    "tiny-invariant": "^1.3.1",
     "prettier-plugin-organize-imports": "^3.2.3",
     "solana-bankrun": "^0.3.0",
+    "tiny-invariant": "^1.3.1",
     "ts-mocha": "^10.0.0",
     "typescript": "^4.3.5"
   }

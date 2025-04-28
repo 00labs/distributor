@@ -1,10 +1,6 @@
-use crate::error::ErrorCode::ArithmeticError;
-use crate::state::merkle_distributor::{ActivationType, ClaimType};
-use crate::{
-    error::ErrorCode,
-    state::merkle_distributor::{AirdropBonus, MerkleDistributor},
-};
-use anchor_lang::{account, context::Context, prelude::*, Accounts, Key, ToAccountInfo};
+use crate::error::ErrorCode;
+use crate::state::merkle_distributor::{ActivationType, AirdropBonus, ClaimType, MerkleDistributor};
+use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
 #[cfg(feature = "localnet")]
@@ -37,7 +33,7 @@ impl NewDistributorParams {
         let max_total_claim = self
             .total_claim
             .checked_add(self.total_bonus)
-            .ok_or(ArithmeticError)?;
+            .ok_or(ErrorCode::ArithmeticError)?;
         Ok(max_total_claim)
     }
     fn get_airdrop_bonus(&self) -> AirdropBonus {
@@ -175,7 +171,7 @@ pub fn handle_new_distributor(
 
     let mut distributor = ctx.accounts.distributor.load_init()?;
 
-    distributor.bump = *ctx.bumps.get("distributor").unwrap();
+    distributor.bump = ctx.bumps.distributor;
     distributor.version = params.version;
     distributor.root = params.root;
     distributor.mint = ctx.accounts.mint.key();

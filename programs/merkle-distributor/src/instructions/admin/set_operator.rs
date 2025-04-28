@@ -2,9 +2,7 @@ use crate::{
     error::ErrorCode,
     state::merkle_distributor::{ClaimType, MerkleDistributor},
 };
-use anchor_lang::{
-    accounts::signer::Signer, context::Context, prelude::*, Accounts, Result, ToAccountInfo,
-};
+use anchor_lang::prelude::*;
 
 /// [merkle_distributor::set_clawback_receiver] accounts.
 #[derive(Accounts)]

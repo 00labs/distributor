@@ -1,56 +1,20 @@
-import { AnchorProvider, Program, Wallet, web3 } from "@coral-xyz/anchor";
-import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { Program, web3 } from "@coral-xyz/anchor";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import BN from "bn.js";
-import fs from "fs";
-import {
-    IDL as MerkleDistributorIDL,
-    MerkleDistributor,
-} from "../../target/types/merkle_distributor";
-import { encodeU64, getOrCreateAssociatedTokenAccountWrap } from "../common";
-import { LOCKED_VOTER_PROGRAM_ID } from "../locked_voter/setup";
+import { Clock, startAnchor } from "solana-bankrun";
+import IDL from "../../target/idl/merkle_distributor.json";
+import { MerkleDistributor } from "../../target/types/merkle_distributor";
+import { BankrunProvider } from "../anchor-bankrun";
+import { createAssociatedTokenAccount, createMint, encodeU64 } from "../common";
 
-const MERKLE_DISTRIBUTOR_PROGRAM_ID = new web3.PublicKey(
-    "DiS3nNjFVMieMgmiQFm6wgJL7nevk4NrhXKLbtEH1Z2R",
-);
-
-const res = fs.readFileSync(
-    process.cwd() + "/keys/localnet/admin-bossj3JvwiNK7pvjr149DqdtJxf2gdygbcmEPTkb2F1.json",
-    "utf8",
-);
-
-export function deriveDistributor(base: web3.PublicKey, mint: web3.PublicKey, version: number) {
-    let [pk] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("MerkleDistributor"), base.toBuffer(), mint.toBuffer(), encodeU64(version)],
-        MERKLE_DISTRIBUTOR_PROGRAM_ID,
-    );
-    return pk;
+export enum WalletIndex {
+    ADMIN,
+    DISTRIBUTOR_ADMIN,
+    OPERATOR,
 }
 
-export function deriveClaimStatus(distributor: web3.PublicKey, claimant: web3.PublicKey) {
-    let [pk] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("ClaimStatus"), claimant.toBuffer(), distributor.toBuffer()],
-        MERKLE_DISTRIBUTOR_PROGRAM_ID,
-    );
-    return pk;
-}
-
-export const ADMIN = Keypair.fromSecretKey(new Uint8Array(JSON.parse(res)));
-
-export const ADMIN_PUBKEY = ADMIN.publicKey;
-
-export function createDistributorProgram(wallet: Wallet): Program<MerkleDistributor> {
-    const provider = new AnchorProvider(AnchorProvider.env().connection, wallet, {
-        maxRetries: 3,
-    });
-    return new Program<MerkleDistributor>(
-        MerkleDistributorIDL,
-        MERKLE_DISTRIBUTOR_PROGRAM_ID,
-        provider,
-    );
-}
-
-export interface CreateNewDisitrbutorParams {
+export interface CreateNewDistributorParams {
     admin: Keypair;
     version: number;
     root: Buffer;
@@ -67,46 +31,75 @@ export interface CreateNewDisitrbutorParams {
     claimType: number;
     operator: PublicKey;
     locker: PublicKey;
-    mint: PublicKey;
     clawbackReceiver: PublicKey;
 }
 
-export async function createNewDistributor(params: CreateNewDisitrbutorParams) {
-    let {
-        admin,
-        version,
-        root,
-        totalClaim,
-        maxNumNodes,
-        startVestingTs,
-        endVestingTs,
-        clawbackStartTs,
-        activationPoint,
-        activationType,
-        closable,
-        totalBonus,
-        bonusVestingDuration,
-        claimType,
-        operator,
-        locker,
-        mint,
-        clawbackReceiver,
-    } = params;
-    const program = createDistributorProgram(new Wallet(admin));
+export interface ClaimParams {
+    claimant: Keypair;
+    operator?: Keypair;
+    distributorPDA: PublicKey;
+    amountUnlocked: BN;
+    amountLocked: BN;
+    proof: Array<number>[];
+}
 
-    let base = Keypair.generate();
+export interface ClaimLockedParams {
+    claimant: Keypair;
+    operator?: Keypair;
+    distributorPDA: PublicKey;
+}
 
-    let distributor = deriveDistributor(base.publicKey, mint, version);
-    let tokenVault = await getOrCreateAssociatedTokenAccountWrap(
-        program.provider.connection,
-        admin,
-        mint,
-        distributor,
-    );
-    await program.methods
-        .newDistributor({
-            version: new BN(version),
-            root: Array.from(new Uint8Array(root)),
+export interface ClawbackParams {
+    payer: Keypair;
+    distributor: PublicKey;
+}
+
+export class Context {
+    provider!: BankrunProvider;
+    program!: Program<MerkleDistributor>;
+    wallets: Keypair[] = [];
+    mint: Keypair;
+
+    constructor() {
+        this.mint = Keypair.generate();
+    }
+
+    async start(numAccounts: number = 25) {
+        const accounts = [];
+        for (let i = 0; i < numAccounts; i++) {
+            const account = Keypair.generate();
+            this.wallets.push(account);
+            accounts.push({
+                address: account.publicKey,
+                info: {
+                    lamports: 100 * web3.LAMPORTS_PER_SOL,
+                    data: Buffer.alloc(0),
+                    owner: SystemProgram.programId,
+                    executable: false,
+                },
+            });
+        }
+
+        const programPath = require("path").resolve(__dirname, "../..");
+        const context = await startAnchor(programPath, [], accounts);
+        this.provider = new BankrunProvider(context);
+        const idl = IDL as MerkleDistributor;
+        this.program = new Program<MerkleDistributor>(idl, this.provider);
+
+        await createMint(
+            this.provider.context,
+            this.admin().publicKey,
+            this.admin().publicKey,
+            6,
+            this.mint,
+        );
+    }
+
+    async createNewDistributor(params: CreateNewDistributorParams) {
+        let {
+            admin,
+            version,
+            root,
             totalClaim,
             maxNumNodes,
             startVestingTs,
@@ -120,280 +113,216 @@ export async function createNewDistributor(params: CreateNewDisitrbutorParams) {
             claimType,
             operator,
             locker,
-        })
-        .accounts({
-            distributor,
-            mint,
             clawbackReceiver,
-            tokenVault,
-            admin: admin.publicKey,
-            base: base.publicKey,
-            systemProgram: web3.SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-        })
-        .signers([base])
-        .rpc()
-        .catch(console.log)
-        .then(console.log);
+        } = params;
+        const base = Keypair.generate();
 
-    return { distributor, tokenVault };
-}
-
-export interface ClaimParams {
-    claimant: Keypair;
-    operator?: Keypair;
-    distributor: PublicKey;
-    amountUnlocked: BN;
-    amountLocked: BN;
-    proof: Array<number>[];
-}
-
-export async function claim(params: ClaimParams) {
-    let { claimant, amountUnlocked, amountLocked, proof, distributor, operator } = params;
-    const program = createDistributorProgram(new Wallet(claimant));
-
-    let distributorState = await program.account.merkleDistributor.fetch(distributor);
-    let claimStatus = deriveClaimStatus(distributor, claimant.publicKey);
-    let to = await getOrCreateAssociatedTokenAccountWrap(
-        program.provider.connection,
-        claimant,
-        distributorState.mint,
-        claimant.publicKey,
-    );
-
-    if (operator == null) {
-        await program.methods
-            .newClaim(amountUnlocked, amountLocked, proof)
-            .accounts({
-                distributor,
-                claimant: claimant.publicKey,
-                claimStatus,
-                from: distributorState.tokenVault,
-                to,
+        const distributorPDA = this.distributorPDA(base.publicKey, this.mint.publicKey, version);
+        const tokenVault = await createAssociatedTokenAccount(
+            this.provider.context,
+            this.mint.publicKey,
+            distributorPDA,
+            true,
+        );
+        await this.program.methods
+            .newDistributor({
+                version: new BN(version),
+                root: Array.from(new Uint8Array(root)),
+                totalClaim,
+                maxNumNodes,
+                startVestingTs,
+                endVestingTs,
+                clawbackStartTs,
+                activationPoint,
+                activationType,
+                closable,
+                totalBonus,
+                bonusVestingDuration,
+                claimType,
+                operator,
+                locker,
+            })
+            .accountsPartial({
+                distributor: distributorPDA,
+                mint: this.mint.publicKey,
+                clawbackReceiver,
+                tokenVault,
+                admin: admin.publicKey,
+                base: base.publicKey,
                 systemProgram: web3.SystemProgram.programId,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                operator: null,
             })
-            .rpc()
-            .catch(console.log)
-            .then(console.log);
-    } else {
-        // user sign tx firstly (need to verify signature to avoid spaming)
-        let tx = await program.methods
-            .newClaim(amountUnlocked, amountLocked, proof)
-            .accounts({
-                distributor,
-                claimant: claimant.publicKey,
-                claimStatus,
-                from: distributorState.tokenVault,
-                to,
-                systemProgram: web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-                operator: operator.publicKey,
-            })
-            .transaction();
+            .signers([base, this.distributorAdmin()])
+            .rpc();
 
-        // pass tx to operator to sign
-        const { blockhash, lastValidBlockHeight } =
-            await program.provider.connection.getLatestBlockhash();
-        tx.feePayer = claimant.publicKey;
-        tx.recentBlockhash = blockhash;
-        tx.lastValidBlockHeight = lastValidBlockHeight;
-        tx.partialSign(operator);
-
-        // pass back user to sign
-        const signedTx = await new Wallet(claimant).signTransaction(tx);
-        const txHash = await program.provider.connection.sendRawTransaction(signedTx.serialize());
-        console.log(txHash);
+        return { distributorPDA, tokenVault };
     }
-}
 
-export interface ClaimAndStakeParams {
-    claimant: Keypair;
-    escrow: PublicKey;
-    operator?: Keypair;
-    distributor: PublicKey;
-    amountUnlocked: BN;
-    amountLocked: BN;
-    proof: Array<number>[];
-}
+    async claim(params: ClaimParams) {
+        const { claimant, amountUnlocked, amountLocked, proof, distributorPDA, operator } = params;
 
-export async function claimAndStake(params: ClaimAndStakeParams) {
-    let { claimant, amountUnlocked, amountLocked, proof, distributor, operator, escrow } = params;
-    const program = createDistributorProgram(new Wallet(claimant));
+        const distributorState =
+            await this.program.account.merkleDistributor.fetch(distributorPDA);
+        const claimStatusPDA = this.claimStatusPDA(distributorPDA, claimant.publicKey);
+        const to = await createAssociatedTokenAccount(
+            this.provider.context,
+            this.mint.publicKey,
+            claimant.publicKey,
+        );
 
-    let distributorState = await program.account.merkleDistributor.fetch(distributor);
-    let claimStatus = deriveClaimStatus(distributor, claimant.publicKey);
-
-    if (operator == null) {
-        await program.methods
-            .newClaimAndStake(amountUnlocked, amountLocked, proof)
-            .accounts({
-                distributor,
-                claimant: claimant.publicKey,
-                claimStatus,
-                from: distributorState.tokenVault,
-                systemProgram: web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-                operator: null,
-                voterProgram: LOCKED_VOTER_PROGRAM_ID,
-                locker: distributorState.locker,
-                escrow,
-                escrowTokens: getAssociatedTokenAddressSync(distributorState.mint, escrow, true),
-            })
-            .rpc()
-            .catch(console.log)
-            .then(console.log);
-    } else {
-        await program.methods
-            .newClaimAndStake(amountUnlocked, amountLocked, proof)
-            .accounts({
-                distributor,
-                claimant: claimant.publicKey,
-                claimStatus,
-                from: distributorState.tokenVault,
-                systemProgram: web3.SystemProgram.programId,
-                tokenProgram: TOKEN_PROGRAM_ID,
-                operator: operator.publicKey,
-                voterProgram: LOCKED_VOTER_PROGRAM_ID,
-                locker: distributorState.locker,
-                escrow,
-                escrowTokens: getAssociatedTokenAddressSync(distributorState.mint, escrow, true),
-            })
-            .signers([operator])
-            .rpc()
-            .catch(console.log)
-            .then(console.log);
+        if (!operator) {
+            await this.program.methods
+                .newClaim(amountUnlocked, amountLocked, proof)
+                .accountsPartial({
+                    distributor: distributorPDA,
+                    claimant: claimant.publicKey,
+                    claimStatus: claimStatusPDA,
+                    from: distributorState.tokenVault,
+                    to,
+                    systemProgram: web3.SystemProgram.programId,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                    operator: undefined,
+                })
+                .signers([claimant])
+                .rpc();
+        } else {
+            // user sign tx first (need to verify signature to avoid spamming)
+            let tx = await this.program.methods
+                .newClaim(amountUnlocked, amountLocked, proof)
+                .accountsPartial({
+                    distributor: distributorPDA,
+                    claimant: claimant.publicKey,
+                    claimStatus: claimStatusPDA,
+                    from: distributorState.tokenVault,
+                    to,
+                    systemProgram: web3.SystemProgram.programId,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                    operator: operator.publicKey,
+                })
+                .signers([claimant, operator])
+                .rpc();
+        }
     }
-}
 
-export interface ClaimLockedParams {
-    claimant: Keypair;
-    operator?: Keypair;
-    distributor: PublicKey;
-}
+    async claimLocked(params: ClaimLockedParams) {
+        const { claimant, distributorPDA, operator } = params;
 
-export async function claimLocked(params: ClaimLockedParams) {
-    let { claimant, distributor, operator } = params;
-    const program = createDistributorProgram(new Wallet(claimant));
+        const distributorState =
+            await this.program.account.merkleDistributor.fetch(distributorPDA);
+        const claimStatusPDA = this.claimStatusPDA(distributorPDA, claimant.publicKey);
+        const to = await createAssociatedTokenAccount(
+            this.provider.context,
+            this.mint.publicKey,
+            claimant.publicKey,
+        );
 
-    let distributorState = await program.account.merkleDistributor.fetch(distributor);
-    let claimStatus = deriveClaimStatus(distributor, claimant.publicKey);
-    let to = await getOrCreateAssociatedTokenAccountWrap(
-        program.provider.connection,
-        claimant,
-        distributorState.mint,
-        claimant.publicKey,
-    );
-
-    if (operator == null) {
-        await program.methods
-            .claimLocked()
-            .accounts({
-                distributor,
-                claimant: claimant.publicKey,
-                claimStatus,
-                from: distributorState.tokenVault,
-                to,
-                tokenProgram: TOKEN_PROGRAM_ID,
-                operator: null,
-            })
-            .rpc()
-            .catch(console.log)
-            .then(console.log);
-    } else {
-        await program.methods
-            .claimLocked()
-            .accounts({
-                distributor,
-                claimant: claimant.publicKey,
-                claimStatus,
-                from: distributorState.tokenVault,
-                to,
-                tokenProgram: TOKEN_PROGRAM_ID,
-                operator: operator.publicKey,
-            })
-            .signers([operator])
-            .rpc()
-            .catch(console.log)
-            .then(console.log);
+        if (!operator) {
+            await this.program.methods
+                .claimLocked()
+                .accountsPartial({
+                    distributor: distributorPDA,
+                    claimant: claimant.publicKey,
+                    claimStatus: claimStatusPDA,
+                    from: distributorState.tokenVault,
+                    to,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                    operator: undefined,
+                })
+                .signers([claimant])
+                .rpc();
+        } else {
+            await this.program.methods
+                .claimLocked()
+                .accountsPartial({
+                    distributor: distributorPDA,
+                    claimant: claimant.publicKey,
+                    claimStatus: claimStatusPDA,
+                    from: distributorState.tokenVault,
+                    to,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                    operator: operator.publicKey,
+                })
+                .signers([claimant, operator])
+                .rpc();
+        }
     }
-}
 
-export interface ClaimLockedAndStakeParams {
-    claimant: Keypair;
-    operator?: Keypair;
-    distributor: PublicKey;
-    escrow: PublicKey;
-}
+    async clawBack(params: ClawbackParams) {
+        const { distributor } = params;
 
-export async function claimLockedAndStake(params: ClaimLockedAndStakeParams) {
-    let { claimant, distributor, operator, escrow } = params;
-    const program = createDistributorProgram(new Wallet(claimant));
+        const distributorState = await this.program.account.merkleDistributor.fetch(distributor);
 
-    let distributorState = await program.account.merkleDistributor.fetch(distributor);
-    let claimStatus = deriveClaimStatus(distributor, claimant.publicKey);
-
-    if (operator == null) {
-        await program.methods
-            .claimLockedAndStake()
-            .accounts({
+        await this.program.methods
+            .clawback()
+            .accountsPartial({
                 distributor,
-                claimant: claimant.publicKey,
-                claimStatus,
                 from: distributorState.tokenVault,
+                clawbackReceiver: distributorState.clawbackReceiver,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                operator: null,
-                voterProgram: LOCKED_VOTER_PROGRAM_ID,
-                locker: distributorState.locker,
-                escrow,
-                escrowTokens: getAssociatedTokenAddressSync(distributorState.mint, escrow, true),
             })
-            .rpc()
-            .catch(console.log)
-            .then(console.log);
-    } else {
-        await program.methods
-            .claimLockedAndStake()
-            .accounts({
-                distributor,
-                claimant: claimant.publicKey,
-                claimStatus,
-                from: distributorState.tokenVault,
-                tokenProgram: TOKEN_PROGRAM_ID,
-                operator: operator.publicKey,
-                voterProgram: LOCKED_VOTER_PROGRAM_ID,
-                locker: distributorState.locker,
-                escrow,
-                escrowTokens: getAssociatedTokenAddressSync(distributorState.mint, escrow, true),
-            })
-            .signers([operator])
-            .rpc()
-            .catch(console.log)
-            .then(console.log);
+            .rpc();
     }
-}
 
-export interface ClawbackParams {
-    payer: Keypair;
-    distributor: PublicKey;
-}
+    async setNextBlockTimestamp(timestamp: number) {
+        const clock = await this.provider.context.banksClient.getClock();
+        this.provider.context.setClock(
+            new Clock(
+                clock.slot,
+                clock.epochStartTimestamp,
+                clock.epoch,
+                clock.leaderScheduleEpoch,
+                BigInt(timestamp),
+            ),
+        );
+    }
 
-export async function clawBack(params: ClawbackParams) {
-    let { payer, distributor } = params;
-    const program = createDistributorProgram(new Wallet(payer));
+    async advanceTime(secondsElapsed: number) {
+        const currentTS = await this.currentTimestamp();
+        const nextTS = currentTS + secondsElapsed;
+        await this.setNextBlockTimestamp(nextTS);
 
-    let distributorState = await program.account.merkleDistributor.fetch(distributor);
+        return nextTS;
+    }
 
-    await program.methods
-        .clawback()
-        .accounts({
-            distributor,
-            from: distributorState.tokenVault,
-            clawbackReceiver: distributorState.clawbackReceiver,
-            tokenProgram: TOKEN_PROGRAM_ID,
-        })
-        .rpc()
-        .catch(console.log)
-        .then(console.log);
+    async currentTimestamp() {
+        const clock = await this.provider.context.banksClient.getClock();
+        return Number(clock.unixTimestamp);
+    }
+
+    admin() {
+        return this.wallets[WalletIndex.ADMIN];
+    }
+
+    distributorAdmin() {
+        return this.wallets[WalletIndex.DISTRIBUTOR_ADMIN];
+    }
+
+    operator() {
+        return this.wallets[WalletIndex.OPERATOR];
+    }
+
+    distributorPDA(base: web3.PublicKey, mint: web3.PublicKey, version: number) {
+        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^");
+        console.log(base);
+        console.log(mint);
+        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^");
+        const [pda] = web3.PublicKey.findProgramAddressSync(
+            [
+                Buffer.from("MerkleDistributor"),
+                base.toBuffer(),
+                mint.toBuffer(),
+                encodeU64(version),
+            ],
+            this.program.programId,
+        );
+        return pda;
+    }
+
+    claimStatusPDA(distributor: web3.PublicKey, claimant: web3.PublicKey) {
+        const [pda] = web3.PublicKey.findProgramAddressSync(
+            [Buffer.from("ClaimStatus"), claimant.toBuffer(), distributor.toBuffer()],
+            this.program.programId,
+        );
+        return pda;
+    }
 }
