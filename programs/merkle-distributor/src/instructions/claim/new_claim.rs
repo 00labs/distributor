@@ -134,7 +134,7 @@ pub fn handle_new_claim(
 
     claim_status.unlocked_amount = amount_unlocked;
     claim_status.bonus_amount =
-        distributor.get_bonus_for_a_claimaint(amount_unlocked, &activation_handler)?;
+        distributor.get_bonus_for_a_claimant(amount_unlocked, &activation_handler)?;
 
     let amount_with_bonus = claim_status.get_total_unlocked_amount()?;
 

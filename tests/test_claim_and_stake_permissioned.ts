@@ -1,17 +1,29 @@
 import * as anchor from "@coral-xyz/anchor";
-import { BalanceTree } from "./merkle_tree";
 import { web3 } from "@coral-xyz/anchor";
-import { ADMIN, claimAndStake, claimLockedAndStake, clawBack, createNewDistributor } from "./merkle_distributor";
-import { createAndFundWallet, getBlockTime, getOrCreateAssociatedTokenAccountWrap, getRandomInt, sleep } from "./common";
-import { BN } from "bn.js";
-import { Keypair, PublicKey } from "@solana/web3.js";
 import { createMint, mintTo, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { BN } from "bn.js";
+import {
+    createAndFundWallet,
+    getBlockTime,
+    getOrCreateAssociatedTokenAccountWrap,
+    getRandomInt,
+    sleep,
+} from "./common";
 import { createNewEscrowWithMaxLock, setupLocker } from "./locked_voter/setup";
+import {
+    ADMIN,
+    claimAndStake,
+    claimLockedAndStake,
+    clawBack,
+    createNewDistributor,
+} from "./merkle_distributor";
+import { BalanceTree } from "./merkle_tree";
 const provider = anchor.AnchorProvider.env();
 
-describe("Claim and stake permissioned", () => {
-    let admin = Keypair.generate();
-    let operator = Keypair.generate();
+describe("Claim and stake permissioned", function() {
+    let admin: Keypair;
+    let operator: Keypair;
     let tree: BalanceTree;
     let maxNumNodes = 5;
     let whitelistedKPs: web3.Keypair[] = [];
@@ -21,7 +33,11 @@ describe("Claim and stake permissioned", () => {
     let mint: PublicKey;
     let locker: PublicKey;
     let escrow: PublicKey;
-    before(async () => {
+
+    before(async function() {
+        admin = Keypair.generate();
+        operator = Keypair.generate();
+
         let escrowOwner = Keypair.generate();
         await createAndFundWallet(provider.connection, ADMIN);
         await createAndFundWallet(provider.connection, admin);
@@ -40,10 +56,13 @@ describe("Claim and stake permissioned", () => {
 
         tree = new BalanceTree(
             whitelistedKPs.map((kp, index) => {
-                return { account: kp.publicKey, amountUnlocked: amountUnlockedArr[index], amountLocked: amountLockedArr[index] };
-            })
+                return {
+                    account: kp.publicKey,
+                    amountUnlocked: amountUnlockedArr[index],
+                    amountLocked: amountLockedArr[index],
+                };
+            }),
         );
-
 
         mint = await createMint(
             provider.connection,
@@ -55,27 +74,27 @@ describe("Claim and stake permissioned", () => {
             {
                 commitment: "confirmed",
             },
-            TOKEN_PROGRAM_ID
+            TOKEN_PROGRAM_ID,
         );
 
-        console.log("create locker")
+        console.log("create locker");
         locker = await setupLocker({
             payer: ADMIN,
             tokenMint: mint,
             maxStakeVoteMultiplier: 1,
             minStakeDuration: new BN(10),
             maxStakeDuration: new BN(10000),
-            proposalActivationMinVotes: new BN(100)
+            proposalActivationMinVotes: new BN(100),
         });
 
-        console.log("create escrow")
+        console.log("create escrow");
         escrow = await createNewEscrowWithMaxLock({
             locker,
             escrowOwner,
         });
+    });
 
-    })
-    it("Full flow", async () => {
+    it("Full flow", async function() {
         console.log("create distributor");
         let currentTime = await getBlockTime(provider.connection);
         let startVestingTs = new BN(currentTime + 3);
@@ -88,7 +107,12 @@ describe("Claim and stake permissioned", () => {
         let bonusVestingDuration = new BN(0);
         let claimType = 3;
 
-        let clawbackReceiver = await getOrCreateAssociatedTokenAccountWrap(provider.connection, ADMIN, mint, ADMIN.publicKey);
+        let clawbackReceiver = await getOrCreateAssociatedTokenAccountWrap(
+            provider.connection,
+            ADMIN,
+            mint,
+            ADMIN.publicKey,
+        );
         let { distributor, tokenVault } = await createNewDistributor({
             admin,
             version: 0,
@@ -112,24 +136,20 @@ describe("Claim and stake permissioned", () => {
         // mint
         await mintTo(provider.connection, ADMIN, mint, tokenVault, ADMIN, totalClaim.toNumber());
 
-        while (true) {
-            const currentTime = await getBlockTime(provider.connection);
-            if (currentTime > activationPoint.toNumber()) {
-                break;
-            } else {
-                await sleep(1000);
-                console.log("Wait until activationPoint");
-            }
+        while (currentTime <= activationPoint.toNumber()) {
+            currentTime = await getBlockTime(provider.connection);
+            await sleep(1000);
+            console.log("Wait until activationPoint");
         }
 
-        console.log("claim and stake")
+        console.log("claim and stake");
         for (let i = 0; i < maxNumNodes - 1; i++) {
-            var proofBuffers = tree.getProof(
+            const proofBuffers = tree.getProof(
                 whitelistedKPs[i].publicKey,
                 amountUnlockedArr[i],
-                amountLockedArr[i]
+                amountLockedArr[i],
             );
-            let proof = [];
+            const proof = [];
             proofBuffers.forEach(function (value) {
                 proof.push(Array.from(new Uint8Array(value)));
             });
@@ -142,19 +162,15 @@ describe("Claim and stake permissioned", () => {
                 proof,
                 escrow,
                 operator,
-            })
+            });
         }
 
-        while (true) {
-            const currentTime = await getBlockTime(provider.connection);
-            if (currentTime > startVestingTs.toNumber()) {
-                break;
-            } else {
-                await sleep(1000);
-                console.log("Wait until startVestingTs");
-            }
+        while (currentTime <= startVestingTs.toNumber()) {
+            currentTime = await getBlockTime(provider.connection);
+            await sleep(1000);
+            console.log("Wait until startVestingTs");
         }
-        console.log("claim locked")
+        console.log("claim locked");
         for (let i = 0; i < maxNumNodes - 1; i++) {
             console.log("claim locked index: ", i);
             await claimLockedAndStake({
@@ -162,22 +178,18 @@ describe("Claim and stake permissioned", () => {
                 claimant: whitelistedKPs[i],
                 escrow,
                 operator,
-            })
+            });
         }
 
-        while (true) {
-            const currentTime = await getBlockTime(provider.connection);
-            if (currentTime > clawbackStartTs.toNumber()) {
-                break;
-            } else {
-                await sleep(1000);
-                console.log("Wait until clawbackStartTs");
-            }
+        while (currentTime <= clawbackStartTs.toNumber()) {
+            currentTime = await getBlockTime(provider.connection);
+            await sleep(1000);
+            console.log("Wait until clawbackStartTs");
         }
-        console.log("clawback")
+        console.log("clawback");
         await clawBack({
             distributor,
             payer: ADMIN,
-        })
-    })
-})
+        });
+    });
+});

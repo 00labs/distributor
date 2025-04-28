@@ -9,9 +9,7 @@
           "name": "distributor",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "[MerkleDistributor]."
-          ],
+          "docs": ["[MerkleDistributor]."],
           "pda": {
             "seeds": [
               {
@@ -42,34 +40,25 @@
           "name": "base",
           "isMut": false,
           "isSigner": true,
-          "docs": [
-            "Base key of the distributor."
-          ]
+          "docs": ["Base key of the distributor."]
         },
         {
           "name": "clawbackReceiver",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "Clawback receiver token account"
-          ]
+          "docs": ["Clawback receiver token account"]
         },
         {
           "name": "mint",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The mint to distribute."
-          ]
+          "docs": ["The mint to distribute."]
         },
         {
           "name": "tokenVault",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "Token vault",
-            "Should create previously"
-          ]
+          "docs": ["Token vault", "Should create previously"]
         },
         {
           "name": "admin",
@@ -84,25 +73,19 @@
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The [System] program."
-          ]
+          "docs": ["The [System] program."]
         },
         {
           "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The [Associated Token] program."
-          ]
+          "docs": ["The [Associated Token] program."]
         },
         {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The [Token] program."
-          ]
+          "docs": ["The [Token] program."]
         }
       ],
       "args": [
@@ -113,10 +96,7 @@
         {
           "name": "root",
           "type": {
-            "array": [
-              "u8",
-              32
-            ]
+            "array": ["u8", 32]
           }
         },
         {
@@ -156,9 +136,7 @@
           "name": "distributor",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "[MerkleDistributor]."
-          ],
+          "docs": ["[MerkleDistributor]."],
           "pda": {
             "seeds": [
               {
@@ -189,34 +167,25 @@
           "name": "base",
           "isMut": false,
           "isSigner": true,
-          "docs": [
-            "Base key of the distributor."
-          ]
+          "docs": ["Base key of the distributor."]
         },
         {
           "name": "clawbackReceiver",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "Clawback receiver token account"
-          ]
+          "docs": ["Clawback receiver token account"]
         },
         {
           "name": "mint",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The mint to distribute."
-          ]
+          "docs": ["The mint to distribute."]
         },
         {
           "name": "tokenVault",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "Token vault",
-            "Should create previously"
-          ]
+          "docs": ["Token vault", "Should create previously"]
         },
         {
           "name": "admin",
@@ -231,25 +200,19 @@
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The [System] program."
-          ]
+          "docs": ["The [System] program."]
         },
         {
           "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The [Associated Token] program."
-          ]
+          "docs": ["The [Associated Token] program."]
         },
         {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The [Token] program."
-          ]
+          "docs": ["The [Token] program."]
         }
       ],
       "args": [
@@ -260,10 +223,7 @@
         {
           "name": "root",
           "type": {
-            "array": [
-              "u8",
-              32
-            ]
+            "array": ["u8", 32]
           }
         },
         {
@@ -306,29 +266,20 @@
     },
     {
       "name": "closeDistributor",
-      "docs": [
-        "only available in test phase"
-      ],
+      "docs": ["only available in test phase"],
       "accounts": [
         {
           "name": "distributor",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "[MerkleDistributor]."
-          ],
-          "relations": [
-            "admin",
-            "token_vault"
-          ]
+          "docs": ["[MerkleDistributor]."],
+          "relations": ["admin", "token_vault"]
         },
         {
           "name": "tokenVault",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "Clawback receiver token account"
-          ]
+          "docs": ["Clawback receiver token account"]
         },
         {
           "name": "admin",
@@ -343,35 +294,26 @@
           "name": "destinationTokenAccount",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "account receive token back"
-          ]
+          "docs": ["account receive token back"]
         },
         {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The [Token] program."
-          ]
+          "docs": ["The [Token] program."]
         }
       ],
       "args": []
     },
     {
       "name": "closeClaimStatus",
-      "docs": [
-        "only available in test phase"
-      ],
+      "docs": ["only available in test phase"],
       "accounts": [
         {
           "name": "claimStatus",
           "isMut": true,
           "isSigner": false,
-          "relations": [
-            "claimant",
-            "admin"
-          ]
+          "relations": ["claimant", "admin"]
         },
         {
           "name": "claimant",
@@ -393,20 +335,14 @@
           "name": "distributor",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "[MerkleDistributor]."
-          ],
-          "relations": [
-            "admin"
-          ]
+          "docs": ["[MerkleDistributor]."],
+          "relations": ["admin"]
         },
         {
           "name": "admin",
           "isMut": true,
           "isSigner": true,
-          "docs": [
-            "Payer to create the distributor."
-          ]
+          "docs": ["Payer to create the distributor."]
         }
       ],
       "args": [
@@ -423,17 +359,13 @@
           "name": "distributor",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "The [MerkleDistributor]."
-          ]
+          "docs": ["The [MerkleDistributor]."]
         },
         {
           "name": "claimStatus",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "Claim status PDA"
-          ],
+          "docs": ["Claim status PDA"],
           "pda": {
             "seeds": [
               {
@@ -459,41 +391,31 @@
           "name": "from",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "Distributor ATA containing the tokens to distribute."
-          ]
+          "docs": ["Distributor ATA containing the tokens to distribute."]
         },
         {
           "name": "to",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "Account to send the claimed tokens to."
-          ]
+          "docs": ["Account to send the claimed tokens to."]
         },
         {
           "name": "claimant",
           "isMut": true,
           "isSigner": true,
-          "docs": [
-            "Who is claiming the tokens."
-          ]
+          "docs": ["Who is claiming the tokens."]
         },
         {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "SPL [Token] program."
-          ]
+          "docs": ["SPL [Token] program."]
         },
         {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The [System] program."
-          ]
+          "docs": ["The [System] program."]
         }
       ],
       "args": [
@@ -509,10 +431,7 @@
           "name": "proof",
           "type": {
             "vec": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           }
         }
@@ -525,17 +444,13 @@
           "name": "distributor",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "The [MerkleDistributor]."
-          ]
+          "docs": ["The [MerkleDistributor]."]
         },
         {
           "name": "claimStatus",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "Claim Status PDA"
-          ],
+          "docs": ["Claim Status PDA"],
           "pda": {
             "seeds": [
               {
@@ -561,9 +476,7 @@
           "name": "from",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "Distributor ATA containing the tokens to distribute."
-          ]
+          "docs": ["Distributor ATA containing the tokens to distribute."]
         },
         {
           "name": "to",
@@ -578,17 +491,13 @@
           "name": "claimant",
           "isMut": true,
           "isSigner": true,
-          "docs": [
-            "Who is claiming the tokens."
-          ]
+          "docs": ["Who is claiming the tokens."]
         },
         {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "SPL [Token] program."
-          ]
+          "docs": ["SPL [Token] program."]
         }
       ],
       "args": []
@@ -600,50 +509,37 @@
           "name": "distributor",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "The [MerkleDistributor]."
-          ]
+          "docs": ["The [MerkleDistributor]."]
         },
         {
           "name": "from",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "Distributor ATA containing the tokens to distribute."
-          ]
+          "docs": ["Distributor ATA containing the tokens to distribute."]
         },
         {
           "name": "to",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "The Clawback token account."
-          ]
+          "docs": ["The Clawback token account."]
         },
         {
           "name": "claimant",
           "isMut": false,
           "isSigner": true,
-          "docs": [
-            "Claimant account",
-            "Anyone can claw back the funds"
-          ]
+          "docs": ["Claimant account", "Anyone can claw back the funds"]
         },
         {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "The [System] program."
-          ]
+          "docs": ["The [System] program."]
         },
         {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "SPL [Token] program."
-          ]
+          "docs": ["SPL [Token] program."]
         }
       ],
       "args": []
@@ -655,25 +551,19 @@
           "name": "distributor",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "The [MerkleDistributor]."
-          ]
+          "docs": ["The [MerkleDistributor]."]
         },
         {
           "name": "newClawbackAccount",
           "isMut": false,
           "isSigner": false,
-          "docs": [
-            "New clawback account"
-          ]
+          "docs": ["New clawback account"]
         },
         {
           "name": "admin",
           "isMut": true,
           "isSigner": true,
-          "docs": [
-            "Admin signer"
-          ]
+          "docs": ["Admin signer"]
         }
       ],
       "args": []
@@ -685,25 +575,19 @@
           "name": "distributor",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "The [MerkleDistributor]."
-          ]
+          "docs": ["The [MerkleDistributor]."]
         },
         {
           "name": "admin",
           "isMut": true,
           "isSigner": true,
-          "docs": [
-            "Admin signer"
-          ]
+          "docs": ["Admin signer"]
         },
         {
           "name": "newAdmin",
           "isMut": true,
           "isSigner": false,
-          "docs": [
-            "New admin account"
-          ]
+          "docs": ["New admin account"]
         }
       ],
       "args": []
@@ -712,38 +596,28 @@
   "accounts": [
     {
       "name": "ClaimStatus",
-      "docs": [
-        "Holds whether or not a claimant has claimed tokens."
-      ],
+      "docs": ["Holds whether or not a claimant has claimed tokens."],
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "claimant",
-            "docs": [
-              "Authority that claimed the tokens."
-            ],
+            "docs": ["Authority that claimed the tokens."],
             "type": "publicKey"
           },
           {
             "name": "lockedAmount",
-            "docs": [
-              "Locked amount"
-            ],
+            "docs": ["Locked amount"],
             "type": "u64"
           },
           {
             "name": "lockedAmountWithdrawn",
-            "docs": [
-              "Locked amount withdrawn"
-            ],
+            "docs": ["Locked amount withdrawn"],
             "type": "u64"
           },
           {
             "name": "unlockedAmount",
-            "docs": [
-              "Unlocked amount"
-            ],
+            "docs": ["Unlocked amount"],
             "type": "u64"
           },
           {
@@ -755,9 +629,7 @@
           },
           {
             "name": "admin",
-            "docs": [
-              "admin of merkle tree, store for for testing purpose"
-            ],
+            "docs": ["admin of merkle tree, store for for testing purpose"],
             "type": "publicKey"
           }
         ]
@@ -765,57 +637,40 @@
     },
     {
       "name": "MerkleDistributor",
-      "docs": [
-        "State for the account which distributes tokens."
-      ],
+      "docs": ["State for the account which distributes tokens."],
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "bump",
-            "docs": [
-              "Bump seed."
-            ],
+            "docs": ["Bump seed."],
             "type": "u8"
           },
           {
             "name": "version",
-            "docs": [
-              "Version of the airdrop"
-            ],
+            "docs": ["Version of the airdrop"],
             "type": "u64"
           },
           {
             "name": "root",
-            "docs": [
-              "The 256-bit merkle root."
-            ],
+            "docs": ["The 256-bit merkle root."],
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "mint",
-            "docs": [
-              "[Mint] of the token to be distributed."
-            ],
+            "docs": ["[Mint] of the token to be distributed."],
             "type": "publicKey"
           },
           {
             "name": "base",
-            "docs": [
-              "base key of distributor."
-            ],
+            "docs": ["base key of distributor."],
             "type": "publicKey"
           },
           {
             "name": "tokenVault",
-            "docs": [
-              "Token Address of the vault"
-            ],
+            "docs": ["Token Address of the vault"],
             "type": "publicKey"
           },
           {
@@ -827,72 +682,52 @@
           },
           {
             "name": "maxNumNodes",
-            "docs": [
-              "Maximum number of nodes in [MerkleDistributor]."
-            ],
+            "docs": ["Maximum number of nodes in [MerkleDistributor]."],
             "type": "u64"
           },
           {
             "name": "totalAmountClaimed",
-            "docs": [
-              "Total amount of tokens that have been claimed."
-            ],
+            "docs": ["Total amount of tokens that have been claimed."],
             "type": "u64"
           },
           {
             "name": "numNodesClaimed",
-            "docs": [
-              "Number of nodes that have been claimed."
-            ],
+            "docs": ["Number of nodes that have been claimed."],
             "type": "u64"
           },
           {
             "name": "startTs",
-            "docs": [
-              "Lockup time start (Unix Timestamp)"
-            ],
+            "docs": ["Lockup time start (Unix Timestamp)"],
             "type": "i64"
           },
           {
             "name": "endTs",
-            "docs": [
-              "Lockup time end (Unix Timestamp)"
-            ],
+            "docs": ["Lockup time end (Unix Timestamp)"],
             "type": "i64"
           },
           {
             "name": "clawbackStartTs",
-            "docs": [
-              "Clawback start (Unix Timestamp)"
-            ],
+            "docs": ["Clawback start (Unix Timestamp)"],
             "type": "i64"
           },
           {
             "name": "clawbackReceiver",
-            "docs": [
-              "Clawback receiver"
-            ],
+            "docs": ["Clawback receiver"],
             "type": "publicKey"
           },
           {
             "name": "admin",
-            "docs": [
-              "Admin wallet"
-            ],
+            "docs": ["Admin wallet"],
             "type": "publicKey"
           },
           {
             "name": "clawedBack",
-            "docs": [
-              "Whether or not the distributor has been clawed back"
-            ],
+            "docs": ["Whether or not the distributor has been clawed back"],
             "type": "bool"
           },
           {
             "name": "enableSlot",
-            "docs": [
-              "this merkle tree is enable from this slot"
-            ],
+            "docs": ["this merkle tree is enable from this slot"],
             "type": "u64"
           },
           {
@@ -904,47 +739,30 @@
           },
           {
             "name": "airdropBonus",
-            "docs": [
-              "bonus multiplier"
-            ],
+            "docs": ["bonus multiplier"],
             "type": {
               "defined": "AirdropBonus"
             }
           },
           {
             "name": "buffer0",
-            "docs": [
-              "Buffer 0"
-            ],
+            "docs": ["Buffer 0"],
             "type": {
-              "array": [
-                "u8",
-                8
-              ]
+              "array": ["u8", 8]
             }
           },
           {
             "name": "buffer1",
-            "docs": [
-              "Buffer 1"
-            ],
+            "docs": ["Buffer 1"],
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "buffer2",
-            "docs": [
-              "Buffer 2"
-            ],
+            "docs": ["Buffer 2"],
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           }
         ]
@@ -959,9 +777,7 @@
         "fields": [
           {
             "name": "totalBonus",
-            "docs": [
-              "total bonus"
-            ],
+            "docs": ["total bonus"],
             "type": "u64"
           },
           {
@@ -970,9 +786,7 @@
           },
           {
             "name": "totalClaimedBonus",
-            "docs": [
-              "total bonus"
-            ],
+            "docs": ["total bonus"],
             "type": "u64"
           }
         ]

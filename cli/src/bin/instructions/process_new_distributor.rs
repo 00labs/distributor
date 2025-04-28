@@ -205,7 +205,6 @@ fn create_new_distributor(args: &Args, new_distributor_args: &NewDistributorArgs
                 .value
             {
                 check_distributor_onchain_matches(
-                    
                   &account,
                   &merkle_tree,
                   new_distributor_args,

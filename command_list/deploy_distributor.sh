@@ -3,11 +3,11 @@ merkle_tree_path="[path to folder that stores merkle tree proof]"
 token_decimals="[Token decimals]"
 token_mint="[Token mint address]"
 
-# can genrate a random keypair to sign
+# can generate a random keypair to sign
 base_path="[Path to base key]"  
 
-# Keypair_path to the address that will deploy distributor (admin), that address also need to prepare enough token to fund merkle tree
-# Note: after deployment is suscessful, and team doesn't need to update anything, admin of distributor should be transfer  to team's multisig
+# keypair_path to the address that will deploy distributor (admin), that address also need to prepare enough token to fund merkle tree
+# Note: after deployment is successful, and team doesn't need to update anything, admin of distributor should be transfer  to team's multisig
 # Command: 
 # target/debug/cli --mint $token_mint --base $base_key --keypair-path $keypair_path --rpc-url $rpc set-admin --new-admin $new_admin --merkle-tree-path $merkle_tree_path
 keypair_path="[Path to keypair]"
@@ -33,7 +33,7 @@ operator="[Operator]"
 locker="[Locker]"
 claim_type=[Claim type]
 
-## caculated variable, can ignore this
+## calculated variable, can ignore this
 # kv_path="[path to kv proofs]"
 priority_fee=1000000 # priority fee, can use other number
 max_nodes_per_tree=12000 # default value, can ignore the field

@@ -69,16 +69,18 @@ pub struct MerkleDistributor {
     pub claim_type: u8,
     /// Bump seed.
     pub bump: u8,
-    /// Whether or not the distributor has been clawed back
+    /// Whether the distributor has been clawed back
     pub clawed_back: u8,
     /// indicate that whether admin can close this pool, for testing purpose
     pub closable: u8,
     /// Padding 0
     pub padding_0: [u8; 3],
-    // bonus multiplier
+    /// Bonus multiplier
     pub airdrop_bonus: AirdropBonus,
-    // padding 2
-    pub padding_2: [u128; 5],
+    /// Paddings
+    pub padding_1: [u8; 32],
+    pub padding_2: [u8; 32],
+    pub padding_3: [u8; 16],
 }
 
 #[zero_copy]
@@ -109,7 +111,7 @@ impl ActivationHandler {
         );
         Ok(())
     }
-    pub fn get_bonus_for_a_claimaint(&self, max_bonus: u64) -> Result<u64> {
+    pub fn get_bonus_for_a_claimant(&self, max_bonus: u64) -> Result<u64> {
         let curr_point = self.curr_point;
         let start_point = self.activation_point;
         let end_point = self.airdrop_bonus.vesting_duration.safe_add(start_point)?;
@@ -159,13 +161,13 @@ impl MerkleDistributor {
             .safe_div(max_total_claim_without_bonus)? as u64;
         Ok(amount)
     }
-    pub fn get_bonus_for_a_claimaint(
+    pub fn get_bonus_for_a_claimant(
         &self,
         unlocked_amount: u64,
         activation_handler: &ActivationHandler,
     ) -> Result<u64> {
         let max_bonus = self.get_max_bonus_for_a_claimant(unlocked_amount)?;
-        activation_handler.get_bonus_for_a_claimaint(max_bonus)
+        activation_handler.get_bonus_for_a_claimant(max_bonus)
     }
     pub fn clawed_back(&self) -> bool {
         self.clawed_back == 1
@@ -245,8 +247,3 @@ impl MerkleDistributorSigner {
         ]
     }
 }
-
-// #[test]
-// fn test_size() {
-//     println!("{} ", MerkleDistributor::INIT_SPACE)
-// }
