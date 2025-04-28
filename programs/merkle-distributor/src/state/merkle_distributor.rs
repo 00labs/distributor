@@ -78,9 +78,9 @@ pub struct MerkleDistributor {
     /// Bonus multiplier
     pub airdrop_bonus: AirdropBonus,
     /// Paddings
+    pub padding_1: [u8; 32],
     pub padding_2: [u8; 32],
-    pub padding_3: [u8; 32],
-    pub padding_4: [u8; 16],
+    pub padding_3: [u8; 16],
 }
 
 #[zero_copy]

@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 env:
   SOLANA_CLI_VERSION: 1.16.17
@@ -50,10 +50,10 @@ jobs:
         run: git diff --exit-code
 
       # Push to anchor repository
-#      - name: Anchor Login
-#        run: anchor login ${{ secrets.ANCHOR_PUBLISH_TOKEN }}
-#      - name: Publish merkle_distributor source code
-#        run: yes 'yes' | anchor publish merkle_distributor --skip-build --provider.cluster mainnet
+      #      - name: Anchor Login
+      #        run: anchor login ${{ secrets.ANCHOR_PUBLISH_TOKEN }}
+      #      - name: Publish merkle_distributor source code
+      #        run: yes 'yes' | anchor publish merkle_distributor --skip-build --provider.cluster mainnet
 
       # Upload artifacts
       - name: Upload Artifact
