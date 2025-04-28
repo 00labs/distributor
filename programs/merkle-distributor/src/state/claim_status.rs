@@ -3,13 +3,13 @@ use anchor_lang::prelude::*;
 use crate::error::ErrorCode::ArithmeticError;
 use static_assertions::const_assert;
 
-/// Holds whether or not a claimant has claimed tokens.
+/// Holds whether a claimant has claimed tokens.
 #[account(zero_copy)]
 #[derive(Default, InitSpace)]
 pub struct ClaimStatus {
-    /// admin of merkle tree, store for for testing purpose
+    /// Admin of merkle tree, stored for testing purpose
     pub admin: Pubkey,
-    /// distributor
+    /// Distributor
     pub distributor: Pubkey,
     /// Authority that claimed the tokens.
     pub claimant: Pubkey,
@@ -21,12 +21,12 @@ pub struct ClaimStatus {
     pub unlocked_amount: u64,
     /// Bonus amount
     pub bonus_amount: u64,
-    /// indicate that whether admin can close this account, for testing purpose
+    /// Whether an admin can close this account, for testing purpose
     pub closable: u8,
     /// padding 0
     pub padding_0: [u8; 7],
     /// padding 1
-    pub padding_1: u128,
+    pub padding_1: [u8; 16],
 }
 
 const_assert!(ClaimStatus::INIT_SPACE == 152);
@@ -58,7 +58,7 @@ impl ClaimStatus {
     ///     We know time_into_unlock and total_unlock_time are both approximately the same size, so we can
     ///     approximate the above as:
     ///         b < 2^64 -1.
-    ///     Since b is a i64, this is always true, so no truncation can occur
+    ///     Since b is an i64, this is always true, so no truncation can occur
     #[allow(clippy::result_large_err)]
     pub fn unlocked_amount(&self, curr_ts: i64, start_ts: i64, end_ts: i64) -> Result<u64> {
         if curr_ts >= start_ts {

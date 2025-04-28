@@ -1,25 +1,54 @@
 {
-    "scripts": {
-        "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-        "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
-    },
-    "dependencies": {
-        "@coral-xyz/anchor": "^0.28.0",
-        "@solana/spl-token": "^0.3.8",
-        "borsh": "^1.0.0",
-        "decimal.js": "^10.4.3"
-    },
-    "devDependencies": {
-        "@solana/web3.js": "^1.95.4",
-        "@types/bn.js": "^5.1.0",
-        "@types/chai": "^4.3.0",
-        "@types/mocha": "^9.0.0",
-        "chai": "^4.3.4",
-        "js-sha3": "^0.8.0",
-        "mocha": "^9.0.3",
-        "prettier": "^2.6.2",
-        "tiny-invariant": "^1.3.1",
-        "ts-mocha": "^10.0.0",
-        "typescript": "^4.3.5"
-    }
+  "name": "huma-merkle-distributor",
+  "version": "3.0.0",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "prepare": "husky install",
+    "fmt": "cargo +nightly fmt",
+    "lint": "cargo clippy -- -A warnings",
+    "lint:fix": "cargo clippy --fix --allow-dirty --allow-staged -- -A warnings",
+    "fmt-ts": "prettier '**/*.{js,json,ts,yml,yaml}' --write --plugin=prettier-plugin-organize-imports",
+    "lint-ts": "eslint 'tests/**/*.ts'",
+    "lint-ts:fix": "eslint 'tests/**/*.ts' --fix",
+    "build": "anchor build -p merkle-distributor",
+    "build-local": "anchor build -p merkle-distributor -- --features localnet",
+    "run-tests": "RUST_LOG=error anchor run test",
+    "test": "yarn build-local && yarn run-tests",
+    "idl": "anchor idl build -p merkle-distributor -o idl/merkle-distributor.json"
+  },
+  "lint-staged": {
+    "*.{js,json,ts,yaml,yml}": [
+      "prettier '**/*.{js,json,ts,yml,yaml}' --write --plugin=prettier-plugin-organize-imports",
+      "eslint --fix"
+    ]
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.28.0",
+    "@solana/spl-token": "^0.3.8",
+    "borsh": "^1.0.0",
+    "decimal.js": "^10.4.3"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
+    "chai": "^4.3.4",
+    "eslint": "^8.49.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-mocha": "^10.1.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "js-sha3": "^0.8.0",
+    "mocha": "^10.1.0",
+    "prettier": "^3.0.3",
+    "tiny-invariant": "^1.3.1",
+    "prettier-plugin-organize-imports": "^3.2.3",
+    "solana-bankrun": "^0.3.0",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^4.3.5"
+  }
 }

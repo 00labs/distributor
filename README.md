@@ -1,4 +1,4 @@
-# Jupiter Merkle Distributor program
+# Huma Merkle Distributor program
 
 ## Development
 
