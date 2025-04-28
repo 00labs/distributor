@@ -28,9 +28,9 @@ edition = "2021"
 publish = false
 
 [workspace.dependencies]
-anchor-lang = "0.28.0"
-anchor-spl = "0.28.0"
-anchor-client = "0.28.0"
+anchor-lang = { version = "0.30.1", features = ["init-if-needed"] }
+anchor-spl = "0.30.1"
+anchor-client = "0.30.1"
 axum = "0.6.2"
 bytemuck = "1.14.0"
 clap = { version = "3.2.25", features = ["derive", "env"] }
@@ -44,15 +44,15 @@ serde = "1.0.137"
 serde_derive = "1.0.171"
 serde_json = "1.0.102"
 serde_yaml = "0.9.25"
-solana-program = { version = "=1.16.16" }
-solana-rpc-client = { version = "=1.16.16" }
-solana-rpc-client-api = { version = "=1.16.16" }
+solana-program = { version = "1.18.16" }
+solana-rpc-client = { version = "1.18.16" }
+solana-rpc-client-api = { version = "1.18.16" }
 solana-security-txt = { version = "1.1.1" }
-solana-sdk = { version = "=1.16.16" }
+solana-sdk = { version = "1.18.16" }
 indexmap = "2.1.0"
 spl-associated-token-account = "2.2.0"
 spl-token = "3.5.0"
-static_assertions = "1.1"
+static_assertions = "1.1.0"
 thiserror = "1.0.50"
 tokio = { version = "1.29.1", features = ["rt-multi-thread", "rt", "macros", "signal"] }
 tower = { version = "0.4.1", features = ["limit", "buffer", "timeout", "load-shed"] }

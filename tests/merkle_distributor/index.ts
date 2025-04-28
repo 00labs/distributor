@@ -50,7 +50,7 @@ export function createDistributorProgram(wallet: Wallet): Program<MerkleDistribu
     );
 }
 
-export interface CreateNewDisitrbutorParams {
+export interface CreateNewDistributorParams {
     admin: Keypair;
     version: number;
     root: Buffer;
@@ -71,7 +71,7 @@ export interface CreateNewDisitrbutorParams {
     clawbackReceiver: PublicKey;
 }
 
-export async function createNewDistributor(params: CreateNewDisitrbutorParams) {
+export async function createNewDistributor(params: CreateNewDistributorParams) {
     let {
         admin,
         version,

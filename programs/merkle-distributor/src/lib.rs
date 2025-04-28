@@ -13,23 +13,24 @@
 #![allow(clippy::too_many_arguments)]
 use anchor_lang::prelude::*;
 use instructions::*;
+use solana_security_txt::security_txt;
 
 pub mod error;
 pub mod instructions;
 pub mod math;
 pub mod state;
-use solana_security_txt::security_txt;
+
 declare_id!("DiS3nNjFVMieMgmiQFm6wgJL7nevk4NrhXKLbtEH1Z2R");
 
 security_txt! {
     // Required fields
     name: "Merkle Distributor",
-    project_url: "https://jup.ag/",
+    project_url: "https://huma.finance/",
     contacts: "email:feedback.raccoons.dev",
-    policy: "https://github.com/jup-ag/distributor",
+    policy: "https://github.com/00labs/distributor",
     // Optional Fields
     preferred_languages: "en",
-    source_code: "https://github.com/jup-ag/distributor"
+    source_code: "https://github.com/00labs/distributor"
 }
 
 #[program]
@@ -99,21 +100,6 @@ pub mod merkle_distributor {
     #[allow(clippy::result_large_err)]
     pub fn claim_locked(ctx: Context<ClaimLocked>) -> Result<()> {
         handle_claim_locked(ctx)
-    }
-
-    #[allow(clippy::result_large_err)]
-    pub fn new_claim_and_stake(
-        ctx: Context<NewClaimAndStake>,
-        amount_unlocked: u64,
-        amount_locked: u64,
-        proof: Vec<[u8; 32]>,
-    ) -> Result<()> {
-        handle_new_claim_and_stake(ctx, amount_unlocked, amount_locked, proof)
-    }
-
-    #[allow(clippy::result_large_err)]
-    pub fn claim_locked_and_stake(ctx: Context<ClaimLockedAndStake>) -> Result<()> {
-        handle_claim_locked_and_stake(ctx)
     }
     // END USER FUNCTIONS //
 }
